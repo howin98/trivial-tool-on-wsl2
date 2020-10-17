@@ -1,0 +1,65 @@
+#!/bin/bash
+
+# apt switch source(domestic)
+# TODO: handle different version
+
+rootDir=`cd $(dirname $0); pwd -P`
+echo $rootDir
+
+sudo cat /etc/os-release | grep PRETTY_NAME;
+sudo cp /etc/apt/sources.list /etc/apt/sources.list.bak;
+
+echo "" > /etc/apt/sources.list;
+echo "deb http://mirrors.tuna.tsinghua.edu.cn/debian/ buster main contrib non-free"                 | sudo tee -a /etc/apt/sources.list;
+echo "deb http://mirrors.tuna.tsinghua.edu.cn/debian/ buster-updates main contrib non-free"         | sudo tee -a /etc/apt/sources.list;
+echo "deb http://mirrors.tuna.tsinghua.edu.cn/debian/ buster-backports main contrib non-free"       | sudo tee -a /etc/apt/sources.list;
+echo "deb http://mirrors.tuna.tsinghua.edu.cn/debian-security buster/updates main contrib non-free" | sudo tee -a /etc/apt/sources.list;
+
+sudo apt-get clean;
+sudo apt-get update;
+sudo apt-get -y upgrade;
+sudo apt-get -y install apt-transport-https ca-certificates;
+
+echo "" > /etc/apt/sources.list;
+echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian/ buster main contrib non-free"                 | sudo tee -a /etc/apt/sources.list;
+echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian/ buster-updates main contrib non-free"         | sudo tee -a /etc/apt/sources.list;
+echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian/ buster-backports main contrib non-free"       | sudo tee -a /etc/apt/sources.list;
+echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian-security buster/updates main contrib non-free" | sudo tee -a /etc/apt/sources.list;
+
+sudo apt-get clean;
+sudo apt-get update;
+sudo apt-get -y upgrade;
+
+# install core service
+
+sudo apt-get -y install neovim ranger git virtualenv zsh screenfetch curl axel;
+
+cp -r $rootDir/nvim ~/.config/nvim
+
+cd ~;
+mkdir Download;
+mkdir Document;
+
+mkdir Program && cd Program && mkdir shells;
+cp -R $rootDir/shells shells;
+sudo chown -R $USER shells && chmod -R u+x shells;
+cd ..;
+
+mkdir Disk && cd Disk;
+dir=$(ls -l /mnt/ |awk '/^d/ {print $NF}')
+for i in $dir
+do
+	ln -s /mnt/$i $i
+done
+cd ..;
+
+cd Download;
+mkdir axel;
+mkdir git;
+cd git;
+git clone --depth=1 https://gitee.com/mirrors/oh-my-zsh.git;
+git clone https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+chsh -s /bin/zsh
+cp $rootDir/zsh/zshrc ~/.zshrc
+oh-my-zsh/tools/install.sh
