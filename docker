@@ -1,0 +1,29 @@
+#!/bin/bash
+rootDir=`cd $(dirname $0); pwd -P`
+
+if [ ! $1 ]; then
+	/bin/docker
+else
+	if [ $1 == "daemon" ]; then
+		usermod -aG docker root
+		if [ ! -d $rootDir/log ]; then
+			mkdir $rootDir/log
+		fi
+		nohup dockerd > $rootDir/log/docker.out &
+	elif [ $1 == "tags" ]; then
+		for Repo in $* ; do
+			if [ Repo == "tags" ]; then
+				continue
+			fi
+			curl -s -S "https://registry.hub.docker.com/v2/repositories/library/$Repo/tags/" | \
+				sed -e 's/,/,\n/g' -e 's/\[/\[\n/g' | \
+				grep '"name"' | \
+				awk -F\" '{print $4;}' | \
+				sort -fu | \
+				sed -e "s/^/${Repo}:/"
+			done
+		else
+			/bin/docker
+	fi
+fi
+

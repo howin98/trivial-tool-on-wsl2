@@ -1,0 +1,39 @@
+#!/bin/bash
+start_time=`date --date='0 days ago' "+%Y-%m-%d %H:%M:%S"`
+
+if [ ${#1} -lt 3 ]; then
+	echo "URL ERROR"
+	exit 0
+fi
+
+if [ ! -d "$HOME/Download" ]; then
+	echo "Download NOT FOUND"
+	mkdir ~/Download
+fi
+
+name=${1##*/}
+name=${name%.*}
+echo "FILE NAME: $name"
+
+if [ ${1:0-3} == "git" ]
+then
+	if [ ! -d "$HOME/Download/git" ]; then
+		echo "Git NOT FOUND"
+		mkdir ~/Download/git
+	fi
+	git clone --depth=1 $1 ~/Download/git/$name
+	echo "SAVE PATH: ~/Download/git"
+else
+	if [ ! -d "$HOME/Download/axel" ]; then
+		echo "Axel NOT FOUND"
+		mkdir ~/Download/axel
+	fi
+	axel -n 8 $1 -o ~/Download/axel/$name
+	echo "SAVE PATH: ~/Download/axel"
+fi
+
+finish_time=`date --date='0 days ago' "+%Y-%m-%d %H:%M:%S"`
+ 
+duration=$(($(($(date +%s -d "$finish_time")-$(date +%s -d "$start_time")))))
+ 
+echo "this shell script execution duration: $duration seconds"
